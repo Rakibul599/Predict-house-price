@@ -3,9 +3,11 @@ import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 
 import "./App.css";
+import axios from "axios";
 
 function App() {
-  const [isloading, setLoading] = useState<boolean>(true);
+  const [isloading, setLoading] = useState<boolean>(false);
+  const [output, setOutput] = useState<boolean>(false);
   type Benefits = {
     mainRoad: boolean;
     guestRoom: boolean;
@@ -17,6 +19,7 @@ function App() {
   type PropertyInfo = {
     area: number;
     bedrooms: number;
+    bathrooms:number;
     stories: number;
     parking: number;
     benefits: Benefits;
@@ -24,6 +27,7 @@ function App() {
   const [formData, setFormData] = useState<PropertyInfo>({
     area: 500,
     bedrooms: 1,
+    bathrooms:1,
     stories: 1,
     parking: 0,
     benefits: {
@@ -34,7 +38,7 @@ function App() {
       airConditioning: false,
     },
   });
-
+  const [Price,setPrice]=useState<number>(0);
   const handleRangeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -54,13 +58,29 @@ function App() {
     }));
   };
    console.log(formData);
+  async function handlePredictprice() {
+    try {
+      setLoading(true)
+      const response = await axios.post("http://127.0.0.1:5000/predict_price", formData, {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
+      setPrice(response.data.price)
+      setLoading(false)
+      setOutput(true)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   return (
     <>
       <div className="bg-[#f0f3f8] w-full h-[100vh] flex items-center justify-center ">
-        <div className="bg-[#ffffff]  h-[95%] w-[90%] rounded-xl shadow-xl fixed">
-          <div className="m-5">
+        <div className="bg-[#ffffff]  h-[98%] w-[90%] rounded-xl shadow-xl fixed">
+          <div className="mt-1 ml-5 mr-5 mb-1">
             <div className="text-center">
-              <h1 className="text-2xl font-bold pt-5">House Price Predictor</h1>
+              <h1 className="text-2xl font-bold pt-1">House Price Predictor</h1>
             </div>
             <div>
               <div>
@@ -90,6 +110,20 @@ function App() {
                   className="w-full "
                 />
                 <p>{formData.bedrooms}</p>
+              </div>
+              <div>
+                <p>Bathrooms</p>
+                <input
+                  type="range"
+                  name="bathrooms"
+                  min={1}
+                  max={10}
+                  value={formData.bathrooms}
+                  onChange={handleRangeChange}
+                  id=""
+                  className="w-full "
+                />
+                <p>{formData.bathrooms}</p>
               </div>
               <div>
                 <p>Stories</p>
@@ -176,13 +210,13 @@ function App() {
               </div>
             </div>
             <div>
-              <button className="w-full bg-[#4298e1] h-[35px] rounded-md mt-4">
+              <button onClick={handlePredictprice} className="w-full bg-[#4298e1] h-[35px] rounded-md mt-4">
                 {isloading ? "Loading..." : "Predict Price"}
                 
               </button>
             </div>
-            <div className="bg-[#e0f2fe] w-full h-[35px] flex items-center justify-center rounded-md font-bold mt-5">
-              <p>Predicted House Price: $473857684</p>
+            <div className={`bg-[#e0f2fe] w-full h-[35px] flex items-center justify-center rounded-md font-bold mt-2 ${output ? "" :"hidden"}`}>
+              <p>Predicted House Price: ${Price}</p>
             </div>
           </div>
         </div>
