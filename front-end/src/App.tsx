@@ -211,7 +211,7 @@ function App() {
             </div>
             <div>
               <button onClick={handlePredictprice} className="w-full bg-[#4298e1] h-[35px] rounded-md mt-4">
-                {isloading ? "Loading..." : "Predict Price"}
+                {isloading ? "Processing..." : "Predict Price"}
                 
               </button>
             </div>
